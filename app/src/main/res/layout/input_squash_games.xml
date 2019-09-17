@@ -18,7 +18,7 @@
             android:alpha="0.2"
             android:hint="@string/input_hint_name"
             android:importantForAutofill="no"
-            android:inputType="text"
+            android:inputType="text|textCapSentences|textCapWords"
             android:textAppearance="@style/TextAppearance.AppCompat.Body2" />
 
         <EditText

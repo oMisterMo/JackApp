@@ -1,6 +1,5 @@
 package com.ds.mo.jackapp;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.os.Bundle;
@@ -46,6 +45,9 @@ public class MainActivity extends AppCompatActivity {
     private int day, month, year;
     private Calendar date;
 
+    private final String inputXML = "input.xml";
+    private final String outputXML = "output.xml";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -57,9 +59,10 @@ public class MainActivity extends AppCompatActivity {
         dc = new DecimalFormat("00.00");
         totalAdded = new ArrayList<>();
         totalWithdrawn = new ArrayList<>();
-        initHistoryAdded();
-        initHistoryWithdrawn();
-        parseXML();
+//        initHistoryAdded();           //Temp hardcoded data
+//        initHistoryWithdrawn();       //Temp hardcoded datas
+        parseOutputXML();
+        parseInputXML();
 
         updateBalance();
         updateTextView();
@@ -96,16 +99,16 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void parseXML() {
+    private void parseOutputXML() {
         try {
             XmlPullParserFactory xmlPullParser;
             xmlPullParser = XmlPullParserFactory.newInstance();
             XmlPullParser parser = xmlPullParser.newPullParser();
-            InputStream is = getAssets().open("output.xml");
+            InputStream is = getAssets().open(outputXML);
             parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false);
             parser.setInput(is, null);
 
-            processResult(parser);
+            processOutResult(parser);
 
         } catch (XmlPullParserException e) {
             e.printStackTrace();
@@ -114,7 +117,25 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void processResult(XmlPullParser parser) throws XmlPullParserException, IOException {
+    private void parseInputXML() {
+        try {
+            XmlPullParserFactory xmlPullParser;
+            xmlPullParser = XmlPullParserFactory.newInstance();
+            XmlPullParser parser = xmlPullParser.newPullParser();
+            InputStream is = getAssets().open(inputXML);
+            parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false);
+            parser.setInput(is, null);
+
+            processInputResult(parser);
+
+        } catch (XmlPullParserException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void processOutResult(XmlPullParser parser) throws XmlPullParserException, IOException {
         ArrayList<Session> sessions = new ArrayList<>();
         int eventType = parser.getEventType();
         Session session = null;
@@ -124,12 +145,10 @@ public class MainActivity extends AppCompatActivity {
             switch (eventType) {
                 case XmlPullParser.START_TAG:
                     /*  START TAG DETECTED */
-                    element = parser.getName();     //Get name of parent node
+                    element = parser.getName();     //Get name of left node
                     if (element.equals("Session")) {
                         System.out.println("Creating a new session object....");
                         session = new Session();
-                        System.out.println("Adding the session to sessions...");
-                        sessions.add(session);
                     } else if (session != null) {
                         if (element.equals("Date")) {
 //                            String date = "";
@@ -141,21 +160,70 @@ public class MainActivity extends AppCompatActivity {
                         } else if (element.equals("Year")) {
                             session.year = parser.nextText();
                         } else if (element.equals("Location")) {
-                            session.locatiion = parser.nextText();
+                            session.location = parser.nextText();
                         } else if (element.equals("Price")) {
                             session.price = parser.nextText();
                         }
                     }
                     break;
                 case XmlPullParser.TEXT:
-                    //empty
+                    //nothing to do -> should remove, could remove
                     break;
                 case XmlPullParser.END_TAG:
-                    //empty
+                    element = parser.getName();
+                    if (element.equals("Session") && session != null) {
+                        System.out.println("Adding the session to sessions...");
+                        sessions.add(session);
+                    }
             }
             eventType = parser.next();
         }
         printSessions(sessions);
+        initHistoryWithdrawn(sessions);
+    }
+
+    private void processInputResult(XmlPullParser parser) throws XmlPullParserException, IOException {
+        ArrayList<Transaction> transactions = new ArrayList<>();
+        int eventType = parser.getEventType();
+        Transaction transaction = null;
+
+        while (eventType != XmlPullParser.END_DOCUMENT) {
+            String element = null;
+            switch (eventType) {
+                case XmlPullParser.START_TAG:
+                    /*  START TAG DETECTED */
+                    element = parser.getName();     //Get name of left node
+                    if (element.equals("Transaction")) {
+                        System.out.println("Creating a new transaction object....");
+                        transaction = new Transaction();
+                    } else if (transaction != null) {
+                        if (element.equals("Day")) {
+                            transaction.day = parser.nextText();
+                        } else if (element.equals("Month")) {
+                            transaction.month = parser.nextText();
+                        } else if (element.equals("Year")) {
+                            transaction.year = parser.nextText();
+                        } else if (element.equals("Name")) {
+                            transaction.name = parser.nextText();
+                        } else if (element.equals("Price")) {
+                            transaction.price = parser.nextText();
+                        }
+                    }
+                    break;
+                case XmlPullParser.TEXT:
+                    //nothing to do -> should remove, could remove
+                    break;
+                case XmlPullParser.END_TAG:
+                    element = parser.getName();
+                    if (element.equals("Transaction") && transaction != null) {
+                        System.out.println("Adding the transaction to transactions...");
+                        transactions.add(transaction);
+                    }
+            }
+            eventType = parser.next();
+        }
+        printTransaction(transactions);
+        initHistoryAdded(transactions);
     }
 
     private void printSessions(ArrayList<Session> sessions) {
@@ -165,8 +233,21 @@ public class MainActivity extends AppCompatActivity {
             sb.append(session.day).append("/");
             sb.append(session.month).append("/");
             sb.append(session.year).append("\n");
-            sb.append(session.locatiion).append("\n");
+            sb.append(session.location).append("\n");
             sb.append(session.price).append("\n\n");
+        }
+        Log.d("MainActivity", sb.toString());
+    }
+
+    private void printTransaction(ArrayList<Transaction> transactions) {
+        StringBuilder sb = new StringBuilder();
+
+        for (Transaction transaction : transactions) {
+            sb.append(transaction.day).append("/");
+            sb.append(transaction.month).append("/");
+            sb.append(transaction.year).append("\n");
+            sb.append(transaction.name).append("\n");
+            sb.append(transaction.price).append("\n\n");
         }
         Log.d("MainActivity", sb.toString());
     }
@@ -185,6 +266,22 @@ public class MainActivity extends AppCompatActivity {
         historyWithdrawn[3] = 2d;
     }
 
+    private void initHistoryWithdrawn(ArrayList<Session> sessions) {
+        System.out.println("Amount of sessions played: " + sessions.size());
+        historyWithdrawn = new double[sessions.size()];
+        for (int i = 0; i < sessions.size(); i++) {
+            historyWithdrawn[i] = Double.valueOf(sessions.get(i).price);
+        }
+    }
+
+    private void initHistoryAdded(ArrayList<Transaction> transactions) {
+        System.out.println("Amount of transactions: " + transactions.size());
+        historyAdded = new double[transactions.size()];
+        for (int i = 0; i < transactions.size(); i++) {
+            historyAdded[i] = Double.valueOf(transactions.get(i).price);
+        }
+    }
+
     private void updateBalance() {
         for (double price : historyAdded) {
             balance += price;
@@ -199,32 +296,36 @@ public class MainActivity extends AppCompatActivity {
 //        alertDialogBuilder.setTitle("Enter Price:");
 
         LayoutInflater layoutInflater = LayoutInflater.from(MainActivity.this);
-        final View inputPrice = layoutInflater.inflate(R.layout.input_add_money, null);
-        alertDialogBuilder.setView(inputPrice);
+        final View addMoneyView = layoutInflater.inflate(R.layout.input_add_money, null);
+        alertDialogBuilder.setView(addMoneyView);
         final AlertDialog alertDialog = alertDialogBuilder.create();
         alertDialog.show();
 
 
         //Save Button
-        Button saveData = inputPrice.findViewById(R.id.button_save);
+        Button saveData = addMoneyView.findViewById(R.id.button_save);
         saveData.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Log.d("MainActivity", "Save pressed...");
-                EditText editText = inputPrice.findViewById(R.id.edit_text);
+                EditText editText = addMoneyView.findViewById(R.id.edit_text);
 //                editText.addTextChangedListener(new DecimalFilter(editText, activity));
                 String inputNum = editText.getText().toString();
                 if (TextUtils.isEmpty(inputNum)) {
                     Snackbar.make(v, "Price can not be empty", Snackbar.LENGTH_SHORT)
                             .setAction("Action", null).show();
 
+                } else if (inputNum.length() == 1 && !TextUtils.isDigitsOnly(inputNum)) {
+                    //Relaying on Android here -> number pad does not allow more than 1 decimal point
+                    Snackbar.make(v, "Price must contain a number", Snackbar.LENGTH_SHORT)
+                            .setAction("Action", null).show();
                 } else {
                     Log.d("MainActivity", "Price input: " + inputNum);
                     //Ensure that input is a number
 
                     //Convert String to double // TODO: 16/09/2019 should use BIG INTEGER
                     double money = Double.parseDouble(inputNum);
-                    adjustBalance(money);
+                    adjustCurrentBalance(money);
                     updateTextView();
 
 
@@ -234,7 +335,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        Button cancelButton = inputPrice.findViewById(R.id.button_cancel);
+        Button cancelButton = addMoneyView.findViewById(R.id.button_cancel);
         cancelButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -248,14 +349,14 @@ public class MainActivity extends AppCompatActivity {
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(MainActivity.this);
 
         LayoutInflater layoutInflater = LayoutInflater.from(MainActivity.this);
-        final View inputPrice = layoutInflater.inflate(R.layout.input_squash_games, null);
-        alertDialogBuilder.setView(inputPrice);
+        final View squashView = layoutInflater.inflate(R.layout.input_squash_games, null);
+        alertDialogBuilder.setView(squashView);
         final AlertDialog alertDialog = alertDialogBuilder.create();
         alertDialog.show();
 
 
         //Handle location field
-        EditText locationField = inputPrice.findViewById(R.id.location_edit_text);
+        EditText locationField = squashView.findViewById(R.id.location_edit_text);
         locationField.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
@@ -264,7 +365,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         //Handle date field
-        EditText dateField = inputPrice.findViewById(R.id.date_edit_text);
+        EditText dateField = squashView.findViewById(R.id.date_edit_text);
         dateField.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
@@ -277,61 +378,69 @@ public class MainActivity extends AppCompatActivity {
 
 
         //Save Button
-        Button saveData = inputPrice.findViewById(R.id.button_save);
+        Button saveData = squashView.findViewById(R.id.button_save);
         saveData.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Log.d("MainActivity", "Save pressed...");
 
                 //Handle location field -------------------------------------------> 1
-                EditText locationEditText = inputPrice.findViewById(R.id.location_edit_text);
+                EditText locationEditText = squashView.findViewById(R.id.location_edit_text);
                 String inputLocation = locationEditText.getText().toString();
                 if (TextUtils.isEmpty(inputLocation)) {
                     //default
                     inputLocation = "Sobell";
-                    Log.d("MainActivity", "***default***");
-                    Log.d("MainActivity", "Location is: " + inputLocation);
+                    Log.d("MainActivity", "***default location***\nLocation is: " + inputLocation);
                 } else {
-                    // TODO: 16/09/2019 make first letter capital
+                    //Grantees first letter is capital even though statically set in xml file
+                    inputLocation = inputLocation.substring(0, 1).toUpperCase() + inputLocation.substring(1);
                     Log.d("MainActivity", "Location is: " + inputLocation);
+
 
                 }
 
                 //Handle date field -----------------------------------------------> 2
-                EditText dateEditText = inputPrice.findViewById(R.id.date_edit_text);
+                EditText dateEditText = squashView.findViewById(R.id.date_edit_text);
                 String inputDate = dateEditText.getText().toString();
                 if (TextUtils.isEmpty(inputDate)) {
-                    Log.d("MainActivity", "***default***");
-                    Log.d("MainActivity", inputDate);
                     inputDate = day + "/" + (month + 1) + "/" + year;
+                    Log.d("MainActivity", "***default date***\nDate is: " + inputDate);
+                } else {
+                    Log.d("MainActivity", inputDate);
                 }
-                Log.d("MainActivity", inputDate);
 
 
                 //Handle price field ----------------------------------------------> 3
-                EditText priceEditText = inputPrice.findViewById(R.id.price_edit_text);
-                String inputPrice = priceEditText.getText().toString();
-                if (TextUtils.isEmpty(inputPrice)) {
+                EditText priceEditText = squashView.findViewById(R.id.price_edit_text);
+                String inputNum = priceEditText.getText().toString();
+                if (TextUtils.isEmpty(inputNum)) {
                     Snackbar.make(v, "Price can not be empty", Snackbar.LENGTH_SHORT)
                             .setAction("Action", null).show();
 
+                } else if (inputNum.length() == 1 && !TextUtils.isDigitsOnly(inputNum)) {
+                    //Relaying on Android here -> number pad does not allow more than 1 decimal point
+                    Snackbar.make(v, "Price must contain a number", Snackbar.LENGTH_SHORT)
+                            .setAction("Action", null).show();
                 } else {
-                    Log.d("MainActivity", "Price input: " + inputPrice);
-                    //Ensure that input is a number
+                    Log.d("MainActivity", "Price input: " + inputNum);
+                    //1.Ensure that input is a number (input validation)
 
-                    //Convert String to double // TODO: 16/09/2019 should use BIG INTEGER
-                    double money = Double.parseDouble(inputPrice);
-                    adjustBalance(-money);
+                    //2.Convert String to double
+                    adjustCurrentBalance(-Double.parseDouble(inputNum));
+
+                    //3. TODO: 17/09/2019 SAVE STRING -> APPEND TO output.xml
+                    String s = inputDate + " " + inputLocation + " " + inputNum;
+                    System.out.println("Final String is: " + s);
+                    System.out.println("Now saving file...(not implemented yet)");
+
                     updateTextView();
-
-
                     //we done, hide the pop up
                     alertDialog.hide();
                 }
             }
         });
 
-        Button cancelButton = inputPrice.findViewById(R.id.button_cancel);
+        Button cancelButton = squashView.findViewById(R.id.button_cancel);
         cancelButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -350,7 +459,7 @@ public class MainActivity extends AppCompatActivity {
         textView.setText(s);
     }
 
-    private void adjustBalance(double money) {
+    private void adjustCurrentBalance(double money) {
         balance += money;
     }
 
