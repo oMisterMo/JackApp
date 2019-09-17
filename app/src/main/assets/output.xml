@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Output>
+    <Session>
+        <Date>
+            <Day>29</Day>
+            <Month>08</Month>
+            <Year>2019</Year>
+        </Date>
+        <Location>Sobell</Location>
+        <Price>2.50</Price>
+    </Session>
+    <Session>
+        <Date>
+            <Day>03</Day>
+            <Month>09</Month>
+            <Year>2019</Year>
+        </Date>
+        <Location>Sobell</Location>
+        <Price>5.00</Price>
+    </Session>
+    <Session>
+        <Date>
+            <Day>08</Day>
+            <Month>09</Month>
+            <Year>2019</Year>
+        </Date>
+        <Location>Sobell</Location>
+        <Price>6.66</Price>
+    </Session>
+    <Session>
+        <Date>
+            <Day>15</Day>
+            <Month>09</Month>
+            <Year>2019</Year>
+        </Date>
+        <Location>Sobell</Location>
+        <Price>2.00</Price>
+    </Session>
+</Output>

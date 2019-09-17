@@ -21,6 +21,12 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlPullParserFactory;
+
+import java.io.IOException;
+import java.io.InputStream;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -53,6 +59,7 @@ public class MainActivity extends AppCompatActivity {
         totalWithdrawn = new ArrayList<>();
         initHistoryAdded();
         initHistoryWithdrawn();
+        parseXML();
 
         updateBalance();
         updateTextView();
@@ -87,6 +94,81 @@ public class MainActivity extends AppCompatActivity {
                 subtractMoney();
             }
         });
+    }
+
+    private void parseXML() {
+        try {
+            XmlPullParserFactory xmlPullParser;
+            xmlPullParser = XmlPullParserFactory.newInstance();
+            XmlPullParser parser = xmlPullParser.newPullParser();
+            InputStream is = getAssets().open("output.xml");
+            parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false);
+            parser.setInput(is, null);
+
+            processResult(parser);
+
+        } catch (XmlPullParserException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void processResult(XmlPullParser parser) throws XmlPullParserException, IOException {
+        ArrayList<Session> sessions = new ArrayList<>();
+        int eventType = parser.getEventType();
+        Session session = null;
+
+        while (eventType != XmlPullParser.END_DOCUMENT) {
+            String element = null;
+            switch (eventType) {
+                case XmlPullParser.START_TAG:
+                    /*  START TAG DETECTED */
+                    element = parser.getName();     //Get name of parent node
+                    if (element.equals("Session")) {
+                        System.out.println("Creating a new session object....");
+                        session = new Session();
+                        System.out.println("Adding the session to sessions...");
+                        sessions.add(session);
+                    } else if (session != null) {
+                        if (element.equals("Date")) {
+//                            String date = "";
+//                            session.date = parser.nextText();
+                        } else if (element.equals("Day")) {
+                            session.day = parser.nextText();
+                        } else if (element.equals("Month")) {
+                            session.month = parser.nextText();
+                        } else if (element.equals("Year")) {
+                            session.year = parser.nextText();
+                        } else if (element.equals("Location")) {
+                            session.locatiion = parser.nextText();
+                        } else if (element.equals("Price")) {
+                            session.price = parser.nextText();
+                        }
+                    }
+                    break;
+                case XmlPullParser.TEXT:
+                    //empty
+                    break;
+                case XmlPullParser.END_TAG:
+                    //empty
+            }
+            eventType = parser.next();
+        }
+        printSessions(sessions);
+    }
+
+    private void printSessions(ArrayList<Session> sessions) {
+        StringBuilder sb = new StringBuilder();
+
+        for (Session session : sessions) {
+            sb.append(session.day).append("/");
+            sb.append(session.month).append("/");
+            sb.append(session.year).append("\n");
+            sb.append(session.locatiion).append("\n");
+            sb.append(session.price).append("\n\n");
+        }
+        Log.d("MainActivity", sb.toString());
     }
 
     private void initHistoryAdded() {
