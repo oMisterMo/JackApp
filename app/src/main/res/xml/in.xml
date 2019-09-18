@@ -1,0 +1,30 @@
+<?xml version='1.0' encoding='utf-8' standalone='yes' ?>
+<Input>
+    <Transaction>
+        <Date>
+            <Day>18</Day>
+            <Month>8</Month>
+            <Year>2019</Year>
+        </Date>
+        <Name>BLANTTER J O</Name>
+        <Price>20</Price>
+    </Transaction>
+    <Transaction>
+        <Date>
+            <Day>18</Day>
+            <Month>8</Month>
+            <Year>2019</Year>
+        </Date>
+        <Name>BLANTTER J O</Name>
+        <Price>40</Price>
+    </Transaction>
+    <Transaction>
+        <Date>
+            <Day>18</Day>
+            <Month>8</Month>
+            <Year>2019</Year>
+        </Date>
+        <Name>BLANTTER J O</Name>
+        <Price>40</Price>
+    </Transaction>
+</Input>
