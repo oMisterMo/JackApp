@@ -20,12 +20,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlPullParserFactory;
-
-import java.io.IOException;
-import java.io.InputStream;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -36,8 +30,8 @@ public class MainActivity extends AppCompatActivity {
     private static double balance = 0d;
     private DecimalFormat dc;
 
-    private ArrayList<Double> totalAdded;
-    private ArrayList<Double> totalWithdrawn;
+    //    private double[] historyAdded = new double[1];
+//    private double[] historyWithdrawn = new double[1];
     private double[] historyAdded;
     private double[] historyWithdrawn;
 
@@ -45,24 +39,39 @@ public class MainActivity extends AppCompatActivity {
     private int day, month, year;
     private Calendar date;
 
-    private final String inputXML = "input.xml";
-    private final String outputXML = "output.xml";
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        System.out.println("*****On Create*****");
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+//        initApp();    //=> MOVED TO onResume, easier initialisation on activity change
+        // TODO: 18/09/2019 Delete test/2.xml and use input/output.xml
+        // TODO: 18/09/2019 Calendar validation
+        // TODO: 18/09/2019 View History .xml file
+        // TODO: 18/09/2019 Clicking view history brings up new screen
+        // TODO: 18/09/2019 View history screen displays all transaction (money added and games played)
+        // TODO: 18/09/2019 View history, red = games player; blue = money added
+    }
+
+    private void initApp() {
         //My decimal format
         dc = new DecimalFormat("00.00");
-        totalAdded = new ArrayList<>();
-        totalWithdrawn = new ArrayList<>();
 //        initHistoryAdded();           //Temp hardcoded data
-//        initHistoryWithdrawn();       //Temp hardcoded datas
-        parseOutputXML();
-        parseInputXML();
+//        initHistoryWithdrawn();       //Temp hardcoded data
+
+        ArrayList<Session> s = IOHelper.parseOutputXML(this);
+        ArrayList<Transaction> t = IOHelper.parseInputXML(this);
+        if (s != null) {
+            System.out.println("Session size on app start: " + s.size());
+            initHistoryWithdrawn(s);
+        }
+        if (t != null) {
+            System.out.println("Transaction size on app start: " + t.size());
+            initHistoryAdded(t);
+        }
 
         updateBalance();
         updateTextView();
@@ -80,7 +89,7 @@ public class MainActivity extends AppCompatActivity {
         datePickerDialog.hide();
         //======================================
 
-        //ADD money
+        //ADD money fab
         FloatingActionButton topUp = findViewById(R.id.top_up);
         topUp.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -89,7 +98,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        //SUBTRACT money
+        //SUBTRACT money fab
         FloatingActionButton subtract = findViewById(R.id.subtract);
         subtract.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -97,159 +106,6 @@ public class MainActivity extends AppCompatActivity {
                 subtractMoney();
             }
         });
-    }
-
-    private void parseOutputXML() {
-        try {
-            XmlPullParserFactory xmlPullParser;
-            xmlPullParser = XmlPullParserFactory.newInstance();
-            XmlPullParser parser = xmlPullParser.newPullParser();
-            InputStream is = getAssets().open(outputXML);
-            parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false);
-            parser.setInput(is, null);
-
-            processOutResult(parser);
-
-        } catch (XmlPullParserException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void parseInputXML() {
-        try {
-            XmlPullParserFactory xmlPullParser;
-            xmlPullParser = XmlPullParserFactory.newInstance();
-            XmlPullParser parser = xmlPullParser.newPullParser();
-            InputStream is = getAssets().open(inputXML);
-            parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false);
-            parser.setInput(is, null);
-
-            processInputResult(parser);
-
-        } catch (XmlPullParserException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void processOutResult(XmlPullParser parser) throws XmlPullParserException, IOException {
-        ArrayList<Session> sessions = new ArrayList<>();
-        int eventType = parser.getEventType();
-        Session session = null;
-
-        while (eventType != XmlPullParser.END_DOCUMENT) {
-            String element = null;
-            switch (eventType) {
-                case XmlPullParser.START_TAG:
-                    /*  START TAG DETECTED */
-                    element = parser.getName();     //Get name of left node
-                    if (element.equals("Session")) {
-                        System.out.println("Creating a new session object....");
-                        session = new Session();
-                    } else if (session != null) {
-                        if (element.equals("Date")) {
-//                            String date = "";
-//                            session.date = parser.nextText();
-                        } else if (element.equals("Day")) {
-                            session.day = parser.nextText();
-                        } else if (element.equals("Month")) {
-                            session.month = parser.nextText();
-                        } else if (element.equals("Year")) {
-                            session.year = parser.nextText();
-                        } else if (element.equals("Location")) {
-                            session.location = parser.nextText();
-                        } else if (element.equals("Price")) {
-                            session.price = parser.nextText();
-                        }
-                    }
-                    break;
-                case XmlPullParser.TEXT:
-                    //nothing to do -> should remove, could remove
-                    break;
-                case XmlPullParser.END_TAG:
-                    element = parser.getName();
-                    if (element.equals("Session") && session != null) {
-                        System.out.println("Adding the session to sessions...");
-                        sessions.add(session);
-                    }
-            }
-            eventType = parser.next();
-        }
-        printSessions(sessions);
-        initHistoryWithdrawn(sessions);
-    }
-
-    private void processInputResult(XmlPullParser parser) throws XmlPullParserException, IOException {
-        ArrayList<Transaction> transactions = new ArrayList<>();
-        int eventType = parser.getEventType();
-        Transaction transaction = null;
-
-        while (eventType != XmlPullParser.END_DOCUMENT) {
-            String element = null;
-            switch (eventType) {
-                case XmlPullParser.START_TAG:
-                    /*  START TAG DETECTED */
-                    element = parser.getName();     //Get name of left node
-                    if (element.equals("Transaction")) {
-                        System.out.println("Creating a new transaction object....");
-                        transaction = new Transaction();
-                    } else if (transaction != null) {
-                        if (element.equals("Day")) {
-                            transaction.day = parser.nextText();
-                        } else if (element.equals("Month")) {
-                            transaction.month = parser.nextText();
-                        } else if (element.equals("Year")) {
-                            transaction.year = parser.nextText();
-                        } else if (element.equals("Name")) {
-                            transaction.name = parser.nextText();
-                        } else if (element.equals("Price")) {
-                            transaction.price = parser.nextText();
-                        }
-                    }
-                    break;
-                case XmlPullParser.TEXT:
-                    //nothing to do -> should remove, could remove
-                    break;
-                case XmlPullParser.END_TAG:
-                    element = parser.getName();
-                    if (element.equals("Transaction") && transaction != null) {
-                        System.out.println("Adding the transaction to transactions...");
-                        transactions.add(transaction);
-                    }
-            }
-            eventType = parser.next();
-        }
-        printTransaction(transactions);
-        initHistoryAdded(transactions);
-    }
-
-    private void printSessions(ArrayList<Session> sessions) {
-        StringBuilder sb = new StringBuilder();
-
-        for (Session session : sessions) {
-            sb.append(session.day).append("/");
-            sb.append(session.month).append("/");
-            sb.append(session.year).append("\n");
-            sb.append(session.location).append("\n");
-            sb.append(session.price).append("\n\n");
-        }
-        Log.d("MainActivity", sb.toString());
-    }
-
-    private void printTransaction(ArrayList<Transaction> transactions) {
-        StringBuilder sb = new StringBuilder();
-
-        for (Transaction transaction : transactions) {
-            sb.append(transaction.day).append("/");
-            sb.append(transaction.month).append("/");
-            sb.append(transaction.year).append("\n");
-            sb.append(transaction.name).append("\n");
-            sb.append(transaction.price).append("\n\n");
-        }
-        Log.d("MainActivity", sb.toString());
     }
 
     private void initHistoryAdded() {
@@ -267,27 +123,36 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initHistoryWithdrawn(ArrayList<Session> sessions) {
-        System.out.println("Amount of sessions played: " + sessions.size());
-        historyWithdrawn = new double[sessions.size()];
-        for (int i = 0; i < sessions.size(); i++) {
-            historyWithdrawn[i] = Double.valueOf(sessions.get(i).price);
+        if (sessions != null) {
+            System.out.println("Amount of sessions played: " + sessions.size());
+            historyWithdrawn = new double[sessions.size()];
+            for (int i = 0; i < sessions.size(); i++) {
+                historyWithdrawn[i] = Double.valueOf(sessions.get(i).price);
+            }
         }
     }
 
     private void initHistoryAdded(ArrayList<Transaction> transactions) {
-        System.out.println("Amount of transactions: " + transactions.size());
-        historyAdded = new double[transactions.size()];
-        for (int i = 0; i < transactions.size(); i++) {
-            historyAdded[i] = Double.valueOf(transactions.get(i).price);
+        if (transactions != null) {
+            System.out.println("Amount of transactions: " + transactions.size());
+            historyAdded = new double[transactions.size()];
+            for (int i = 0; i < transactions.size(); i++) {
+                historyAdded[i] = Double.valueOf(transactions.get(i).price);
+            }
         }
     }
 
     private void updateBalance() {
-        for (double price : historyAdded) {
-            balance += price;
+        System.out.println("Update balance...");
+        if (historyAdded != null) {
+            for (double price : historyAdded) {
+                balance += price;
+            }
         }
-        for (double price : historyWithdrawn) {
-            balance -= price;
+        if (historyWithdrawn != null) {
+            for (double price : historyWithdrawn) {
+                balance -= price;
+            }
         }
     }
 
@@ -316,21 +181,34 @@ public class MainActivity extends AppCompatActivity {
                             .setAction("Action", null).show();
 
                 } else if (inputNum.length() == 1 && !TextUtils.isDigitsOnly(inputNum)) {
-                    //Relaying on Android here -> number pad does not allow more than 1 decimal point
+                    //Relying on Android here -> number pad does not allow more than 1 decimal point
                     Snackbar.make(v, "Price must contain a number", Snackbar.LENGTH_SHORT)
                             .setAction("Action", null).show();
                 } else {
                     Log.d("MainActivity", "Price input: " + inputNum);
-                    //Ensure that input is a number
+                    //1.Ensure that input is a number (input validation)
 
-                    //Convert String to double // TODO: 16/09/2019 should use BIG INTEGER
-                    double money = Double.parseDouble(inputNum);
-                    adjustCurrentBalance(money);
+                    //2.Convert String to double
+                    adjustCurrentBalance(Double.parseDouble(inputNum));
+
+                    //3.Save to .xml file
+                    String inputName = "BLANTTER J O"; //Using default values for name and date
+                    String inputDate = day + "/" + (month + 1) + "/" + year;
+
+                    String s = inputDate + " " + inputName + " " + inputNum;
+                    System.out.println("Final String is: " + s);
+                    System.out.println("Now saving file...");
+                    //Save file =====================================================
+
+
+                    IOHelper.writeToXMLinput(addMoneyView,
+                            new Transaction(String.valueOf(day), String.valueOf(month),
+                                    String.valueOf(year), inputName, inputNum));
+                    //===============================================================
                     updateTextView();
-
-
                     //we done, hide the pop up
-                    alertDialog.hide();
+//                    alertDialog.hide();
+                    alertDialog.dismiss();
                 }
             }
         });
@@ -431,11 +309,15 @@ public class MainActivity extends AppCompatActivity {
                     //3. TODO: 17/09/2019 SAVE STRING -> APPEND TO output.xml
                     String s = inputDate + " " + inputLocation + " " + inputNum;
                     System.out.println("Final String is: " + s);
-                    System.out.println("Now saving file...(not implemented yet)");
+                    System.out.println("Now saving file...");
+
+                    IOHelper.writeToXMLoutput(squashView, new Session(String.valueOf(day), String.valueOf(month),
+                            String.valueOf(year), inputLocation, inputNum));
 
                     updateTextView();
                     //we done, hide the pop up
-                    alertDialog.hide();
+//                    alertDialog.hide();
+                    alertDialog.dismiss();
                 }
             }
         });
@@ -466,10 +348,37 @@ public class MainActivity extends AppCompatActivity {
     private void clearTotal() {
         //Reset count
         balance = 0;
-        //Do this later
-        TextView textView = findViewById(R.id.total);
-        String s = POUND + dc.format(balance);
-        textView.setText(s);
+        updateTextView();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        System.out.println("*****On Resume*****");
+//        initApp();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        System.out.println("*****On Pause*****");
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        System.out.println("*****On Stop*****");
+        IOHelper.sessions = null;
+        IOHelper.transactions = null;
+        historyAdded = null;
+        historyWithdrawn = null;
+        balance = 0;
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        System.out.println("*****On Destroy*****");
     }
 
     @Override
