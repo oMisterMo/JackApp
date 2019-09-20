@@ -2,17 +2,21 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.ds.mo.jackapp.MainActivity">
+
+    <item
+        android:id="@+id/action_clear"
+        android:orderInCategory="98"
+        android:title="@string/action_clear"
+        app:showAsAction="never" />
     <item
         android:id="@+id/action_history"
         android:orderInCategory="99"
         android:title="@string/action_history"
         app:showAsAction="never" />
-
-    <!-- DEBUG ONLY -->
     <item
-        android:id="@+id/action_clear"
+        android:id="@+id/action_delete"
         android:orderInCategory="100"
-        android:title="@string/action_clear"
+        android:title="@string/action_delete"
         app:showAsAction="never" />
 
 </menu>
