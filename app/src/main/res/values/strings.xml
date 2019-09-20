@@ -2,12 +2,16 @@
     <string name="app_name">Jack App</string>
     <string name="action_history">View History</string>
     <string name="action_clear">Clear</string>
+    <string name="action_delete">Delete</string>
     <string name="total">£00.00</string>
-    <string name="input_hint_name">Sobell</string>
+
+    <string name="input_hint_name">Name</string>
+    <string name="input_hint_location">Sobell</string>
     <string name="input_hint_date">dd/mm/yyyy</string>
     <string name="input_hint_price">£00.00</string>
 
     <string name="button_cancel">Cancel</string>
     <string name="button_save">Save</string>
 
+    <string name="history_text">HISTORY</string>
 </resources>

@@ -48,7 +48,6 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
 //        initApp();    //=> MOVED TO onResume, easier initialisation on activity change
-        // TODO: 18/09/2019 Calendar validation
         // TODO: 18/09/2019 View History .xml file
         // TODO: 18/09/2019 Clicking view history brings up new screen
         // TODO: 18/09/2019 View history screen displays all transaction (money added and games played)
@@ -160,6 +159,26 @@ public class MainActivity extends AppCompatActivity {
         final AlertDialog alertDialog = alertDialogBuilder.create();
         alertDialog.show();
 
+        //Handle date field
+        final EditText dateField = addMoneyView.findViewById(R.id.date_edit_text);
+        dateField.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus) {
+                    Log.d("MainActivity", "**********HAS FOCUS***********");
+                    datePickerDialog = new DatePickerDialog(
+                            addMoneyView.getContext(), new DatePickerDialog.OnDateSetListener() {
+                        @Override
+                        public void onDateSet(DatePicker view, int y, int m, int d) {
+                            System.out.printf("Date touched: %d/%d/%d\n", d, (m + 1), y);
+                            dateField.setText(String.format(Locale.UK, "%d/%d/%d", d, (m + 1), y));
+                        }
+                    }, year, month, day);
+                    datePickerDialog.getDatePicker().setMaxDate(System.currentTimeMillis() + 1000);
+                    datePickerDialog.show();
+                }
+            }
+        });
 
         //Save Button
         Button saveData = addMoneyView.findViewById(R.id.button_save);
@@ -167,6 +186,43 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Log.d("MainActivity", "Save pressed...");
+
+                //Handle location field -------------------------------------------> 1
+                EditText locationEditText = addMoneyView.findViewById(R.id.name_edit_text);
+                String inputName = locationEditText.getText().toString();
+                if (TextUtils.isEmpty(inputName)) {
+                    //default name
+                    inputName = "BLANTTER J O";
+                    Log.d("MainActivity", "***default name***\nName is: " + inputName);
+                } else {
+                    //CAPITALISE NAME
+                    inputName = inputName.toUpperCase().trim();
+                    Log.d("MainActivity", "Name is: " + inputName);
+
+
+                }
+
+                //Handle date field -----------------------------------------------> 2
+                int d, m, y;
+                EditText dateEditText = addMoneyView.findViewById(R.id.date_edit_text);
+                String inputDate = dateEditText.getText().toString();
+                if (TextUtils.isEmpty(inputDate)) {
+                    //default day (current)
+                    d = day;
+                    m = month;
+                    y = year;
+                    inputDate = d + "/" + m + "/" + y;
+                    Log.d("MainActivity", "***default date***\nDate is: " + inputDate);
+                } else {
+                    inputDate = dateEditText.getText().toString();
+                    Log.d("MainActivity", inputDate);
+                    String[] s = inputDate.split("/");
+                    d = Integer.parseInt(s[0]);
+                    m = Integer.parseInt(s[1]);
+                    y = Integer.parseInt(s[2]);
+                }
+
+
                 EditText editText = addMoneyView.findViewById(R.id.edit_text);
 //                editText.addTextChangedListener(new DecimalFilter(editText, activity));
                 String inputNum = editText.getText().toString();
@@ -186,8 +242,8 @@ public class MainActivity extends AppCompatActivity {
                     adjustCurrentBalance(Double.parseDouble(inputNum));
 
                     //3.Save to .xml file
-                    String inputName = "BLANTTER J O"; //Using default values for name and date
-                    String inputDate = day + "/" + month + "/" + year;
+//                    String inputName = "BLANTTER J O"; //Using default values for name and date
+//                    String inputDate = day + "/" + month + "/" + year;
 
                     String s = inputDate + " " + inputName + " " + inputNum;
                     System.out.println("Final String is: " + s);
@@ -196,8 +252,8 @@ public class MainActivity extends AppCompatActivity {
 
 
                     IOHelper.writeToXMLinput(addMoneyView,
-                            new Transaction(String.valueOf(day), String.valueOf(month),
-                                    String.valueOf(year), inputName, inputNum));
+                            new Transaction(String.valueOf(d), String.valueOf(m),
+                                    String.valueOf(y), inputName, inputNum));
                     //===============================================================
                     updateTextView();
                     //we done, hide the pop up
@@ -269,7 +325,7 @@ public class MainActivity extends AppCompatActivity {
                 EditText locationEditText = squashView.findViewById(R.id.location_edit_text);
                 String inputLocation = locationEditText.getText().toString();
                 if (TextUtils.isEmpty(inputLocation)) {
-                    //default
+                    //default location
                     inputLocation = "Sobell";
                     Log.d("MainActivity", "***default location***\nLocation is: " + inputLocation);
                 } else {
@@ -285,6 +341,7 @@ public class MainActivity extends AppCompatActivity {
                 EditText dateEditText = squashView.findViewById(R.id.date_edit_text);
                 String inputDate = dateEditText.getText().toString();
                 if (TextUtils.isEmpty(inputDate)) {
+                    //default day (current)
                     d = day;
                     m = month;
                     y = year;

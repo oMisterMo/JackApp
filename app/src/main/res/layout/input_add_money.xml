@@ -5,15 +5,44 @@
     android:orientation="vertical">
 
 
-    <EditText
-        android:id="@+id/edit_text"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:alpha="0.2"
-        android:hint="@string/input_hint_price"
-        android:importantForAutofill="no"
-        android:inputType="number|numberDecimal"
-        android:textAppearance="@style/TextAppearance.AppCompat.Display3" />
+        android:orientation="horizontal">
+
+        <EditText
+            android:id="@+id/name_edit_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:alpha="0.2"
+            android:hint="@string/input_hint_name"
+            android:importantForAutofill="no"
+            android:inputType="text|textCapSentences|textCapWords"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body2" />
+
+        <EditText
+            android:id="@+id/date_edit_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:alpha="0.2"
+            android:hint="@string/input_hint_date"
+            android:importantForAutofill="no"
+            android:inputType="date"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body2" />
+
+        <EditText
+            android:id="@+id/edit_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:alpha="0.2"
+            android:hint="@string/input_hint_price"
+            android:importantForAutofill="no"
+            android:inputType="number|numberDecimal"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body2" />
+    </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"

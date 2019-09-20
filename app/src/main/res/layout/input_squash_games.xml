@@ -16,7 +16,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:alpha="0.2"
-            android:hint="@string/input_hint_name"
+            android:hint="@string/input_hint_location"
             android:importantForAutofill="no"
             android:inputType="text|textCapSentences|textCapWords"
             android:textAppearance="@style/TextAppearance.AppCompat.Body2" />
@@ -48,7 +48,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
-
 
         <Button
             android:id="@+id/button_cancel"
