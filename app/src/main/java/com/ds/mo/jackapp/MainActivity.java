@@ -17,12 +17,14 @@ import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.TextView;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -30,8 +32,6 @@ public class MainActivity extends AppCompatActivity {
     private static double balance = 0d;
     private DecimalFormat dc;
 
-    //    private double[] historyAdded = new double[1];
-//    private double[] historyWithdrawn = new double[1];
     private double[] historyAdded;
     private double[] historyWithdrawn;
 
@@ -48,7 +48,6 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
 //        initApp();    //=> MOVED TO onResume, easier initialisation on activity change
-        // TODO: 18/09/2019 Delete test/2.xml and use input/output.xml
         // TODO: 18/09/2019 Calendar validation
         // TODO: 18/09/2019 View History .xml file
         // TODO: 18/09/2019 Clicking view history brings up new screen
@@ -79,14 +78,9 @@ public class MainActivity extends AppCompatActivity {
         //date===================================
         date = Calendar.getInstance();
         day = date.get(Calendar.DAY_OF_MONTH);
-        month = date.get(Calendar.MONTH);
+        month = (date.get(Calendar.MONTH) + 1);
         year = date.get(Calendar.YEAR);
-        System.out.printf("MO: %d, %d, %d%n", day, month, year);
-        datePickerDialog = new DatePickerDialog(
-                this, null, year, month, day);
-        //There's also set min date
-        datePickerDialog.getDatePicker().setMaxDate(System.currentTimeMillis() + 1000);
-        datePickerDialog.hide();
+        System.out.printf("Today's Date: %d, %d, %d%n", day, month, year);
         //======================================
 
         //ADD money fab
@@ -193,7 +187,7 @@ public class MainActivity extends AppCompatActivity {
 
                     //3.Save to .xml file
                     String inputName = "BLANTTER J O"; //Using default values for name and date
-                    String inputDate = day + "/" + (month + 1) + "/" + year;
+                    String inputDate = day + "/" + month + "/" + year;
 
                     String s = inputDate + " " + inputName + " " + inputNum;
                     System.out.println("Final String is: " + s);
@@ -243,12 +237,21 @@ public class MainActivity extends AppCompatActivity {
         });
 
         //Handle date field
-        EditText dateField = squashView.findViewById(R.id.date_edit_text);
+        final EditText dateField = squashView.findViewById(R.id.date_edit_text);
         dateField.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
                 if (hasFocus) {
                     Log.d("MainActivity", "**********HAS FOCUS***********");
+                    datePickerDialog = new DatePickerDialog(
+                            squashView.getContext(), new DatePickerDialog.OnDateSetListener() {
+                        @Override
+                        public void onDateSet(DatePicker view, int y, int m, int d) {
+                            System.out.printf("Date touched: %d/%d/%d\n", d, (m + 1), y);
+                            dateField.setText(String.format(Locale.UK, "%d/%d/%d", d, (m + 1), y));
+                        }
+                    }, year, month, day);
+                    datePickerDialog.getDatePicker().setMaxDate(System.currentTimeMillis() + 1000);
                     datePickerDialog.show();
                 }
             }
@@ -278,13 +281,22 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 //Handle date field -----------------------------------------------> 2
+                int d, m, y;
                 EditText dateEditText = squashView.findViewById(R.id.date_edit_text);
                 String inputDate = dateEditText.getText().toString();
                 if (TextUtils.isEmpty(inputDate)) {
-                    inputDate = day + "/" + (month + 1) + "/" + year;
+                    d = day;
+                    m = month;
+                    y = year;
+                    inputDate = d + "/" + m + "/" + y;
                     Log.d("MainActivity", "***default date***\nDate is: " + inputDate);
                 } else {
+                    inputDate = dateEditText.getText().toString();
                     Log.d("MainActivity", inputDate);
+                    String[] s = inputDate.split("/");
+                    d = Integer.parseInt(s[0]);
+                    m = Integer.parseInt(s[1]);
+                    y = Integer.parseInt(s[2]);
                 }
 
 
@@ -311,8 +323,8 @@ public class MainActivity extends AppCompatActivity {
                     System.out.println("Final String is: " + s);
                     System.out.println("Now saving file...");
 
-                    IOHelper.writeToXMLoutput(squashView, new Session(String.valueOf(day), String.valueOf(month),
-                            String.valueOf(year), inputLocation, inputNum));
+                    IOHelper.writeToXMLoutput(squashView, new Session(String.valueOf(d), String.valueOf(m),
+                            String.valueOf(y), inputLocation, inputNum));
 
                     updateTextView();
                     //we done, hide the pop up
@@ -355,7 +367,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         System.out.println("*****On Resume*****");
-//        initApp();
+        initApp();
     }
 
     @Override
@@ -402,6 +414,13 @@ public class MainActivity extends AppCompatActivity {
         }
         if (id == R.id.action_clear) {
             Log.d("MainActivity", "CLEAR");
+            clearTotal();
+            return true;
+        }
+        if (id == R.id.action_delete) {
+            Log.d("MainActivity", "DELETE");
+            IOHelper.deleteFile(this, "input.xml");
+            IOHelper.deleteFile(this, "output.xml");
             clearTotal();
             return true;
         }
