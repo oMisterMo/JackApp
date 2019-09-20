@@ -21,7 +21,7 @@ public final class IOHelper {
     public static ArrayList<Transaction> transactions = new ArrayList<>();
     public static ArrayList<Session> sessions = new ArrayList<>();
 
-    private final static String inputXML = "input.xml";    //move to IOHelper???
+    private final static String inputXML = "input.xml";
     private final static String outputXML = "output.xml";
 
     public static void deleteFile(Context context, String fileName) {
@@ -45,22 +45,13 @@ public final class IOHelper {
 
     public static void writeToXMLinput(View view, Transaction t) {
         System.out.println("WRITING TO FILE................");
-        //Read from internal storage
-
-
-        //Add old info transaction array
-//        ArrayList<Transaction> transactions = new ArrayList<>();
-//        transactions.add(new Transaction(
-//                "27", "10", "2019", "Mo", "5")
-//        );    //Single element
-//        transactions.add(new Transaction(
-//                "10", "03", "2019", "BLANTTER J O", "10")
-//        );
-        //Add new data
+        if(transactions == null){
+            transactions = new ArrayList<>();
+        }
         transactions.add(t);
         //=====================================================================
 
-        //Rewrite to file
+        //Convert transaction array to xml format
         XmlSerializer serializer = Xml.newSerializer();
         StringWriter writer = new StringWriter();
         try {
@@ -98,11 +89,13 @@ public final class IOHelper {
             serializer.endTag("", "Input");
             serializer.endDocument();
 
+            //Test conversion
             String result = writer.toString();
-            IOHelper.writeToFile(view.getContext(), inputXML, result);
-
-            System.out.println("Test xml writer...");
+            System.out.println("Test xml writer..." + inputXML);
             System.out.println(result);
+
+            //Write to xml file on the internal storage
+            IOHelper.writeToFile(view.getContext(), inputXML, result);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -194,15 +187,13 @@ public final class IOHelper {
     //=========== REMOVE MONEY ===================================================+++++=============
     public static void writeToXMLoutput(View view, Session s) {
         System.out.println("WRITING TO FILE................");
-        //Add new data
-//        sessions.add(new Session("09", "10", "2019", "Sobell", "2.50"));
-//        sessions.add(new Session("09", "10", "2019", "Sobell", "5"));
-//        sessions.add(new Session("09", "10", "2019", "Sobell", "6.66"));
-//        sessions.add(new Session("09", "10", "2019", "Sobell", "2"));
+        if(sessions == null){
+            sessions = new ArrayList<>();
+        }
         sessions.add(s);
         //=====================================================================
 
-        //Rewrite to file
+        //Convert sessions array to xml format
         XmlSerializer serializer = Xml.newSerializer();
         StringWriter writer = new StringWriter();
         try {
@@ -240,11 +231,13 @@ public final class IOHelper {
             serializer.endTag("", "Output");
             serializer.endDocument();
 
+            //Test conversion
             String result = writer.toString();
-            IOHelper.writeToFile(view.getContext(), outputXML, result);
-
-            System.out.println("Test2 xml writer...");
+            System.out.println("Test xml writer..." + outputXML);
             System.out.println(result);
+
+            //Write to xml file on the internal storage
+            IOHelper.writeToFile(view.getContext(), outputXML, result);
         } catch (IOException e) {
             e.printStackTrace();
         }
