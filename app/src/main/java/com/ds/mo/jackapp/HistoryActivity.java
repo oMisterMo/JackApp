@@ -3,6 +3,7 @@ package com.ds.mo.jackapp;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.Html;
+import android.text.method.ScrollingMovementMethod;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -77,6 +78,7 @@ public class HistoryActivity extends AppCompatActivity {
         }
 
         TextView historyView = findViewById(R.id.history);
+        historyView.setMovementMethod(new ScrollingMovementMethod());   //Makes text view scrollable
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             historyView.setText(Html.fromHtml(sb.toString(), Html.FROM_HTML_MODE_LEGACY),
                     TextView.BufferType.SPANNABLE);

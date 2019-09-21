@@ -7,5 +7,8 @@
         android:id="@+id/history"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/history_text" />
+        android:text="@string/history_text"
+        android:scrollbars="vertical"
+        android:fadeScrollbars="true"
+        android:verticalScrollbarPosition="defaultPosition" />
 </LinearLayout>

@@ -265,7 +265,8 @@ public final class IOHelper {
         return null;
     }
 
-    private static ArrayList<Session> processOutResult(XmlPullParser parser) throws XmlPullParserException, IOException {
+    private static ArrayList<Session> processOutResult(XmlPullParser parser)
+            throws XmlPullParserException, IOException {
         if (sessions == null) {
             sessions = new ArrayList<>();
         } else {
