@@ -45,7 +45,7 @@ public final class IOHelper {
 
     public static void writeToXMLinput(View view, Transaction t) {
         System.out.println("WRITING TO FILE................");
-        if(transactions == null){
+        if (transactions == null) {
             transactions = new ArrayList<>();
         }
         transactions.add(t);
@@ -125,6 +125,8 @@ public final class IOHelper {
             throws XmlPullParserException, IOException {
         if (transactions == null) {
             transactions = new ArrayList<>();
+        } else {
+            transactions.clear();
         }
         int eventType = parser.getEventType();
         Transaction transaction = null;
@@ -187,7 +189,7 @@ public final class IOHelper {
     //=========== REMOVE MONEY ===================================================+++++=============
     public static void writeToXMLoutput(View view, Session s) {
         System.out.println("WRITING TO FILE................");
-        if(sessions == null){
+        if (sessions == null) {
             sessions = new ArrayList<>();
         }
         sessions.add(s);
@@ -266,6 +268,8 @@ public final class IOHelper {
     private static ArrayList<Session> processOutResult(XmlPullParser parser) throws XmlPullParserException, IOException {
         if (sessions == null) {
             sessions = new ArrayList<>();
+        } else {
+            sessions.clear();
         }
         int eventType = parser.getEventType();
         Session session = null;
