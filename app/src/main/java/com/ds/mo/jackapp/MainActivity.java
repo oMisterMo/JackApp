@@ -2,6 +2,7 @@ package com.ds.mo.jackapp;
 
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
+import android.content.Intent;
 import android.os.Bundle;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -35,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
     private double[] historyAdded;
     private double[] historyWithdrawn;
 
-    private DatePickerDialog datePickerDialog;
+//    private DatePickerDialog datePickerDialog;
     private int day, month, year;
     private Calendar date;
 
@@ -48,10 +49,6 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
 //        initApp();    //=> MOVED TO onResume, easier initialisation on activity change
-        // TODO: 18/09/2019 View History .xml file
-        // TODO: 18/09/2019 Clicking view history brings up new screen
-        // TODO: 18/09/2019 View history screen displays all transaction (money added and games played)
-        // TODO: 18/09/2019 View history, red = games player; blue = money added
     }
 
     private void initApp() {
@@ -166,7 +163,7 @@ public class MainActivity extends AppCompatActivity {
             public void onFocusChange(View v, boolean hasFocus) {
                 if (hasFocus) {
                     Log.d("MainActivity", "**********HAS FOCUS***********");
-                    datePickerDialog = new DatePickerDialog(
+                    DatePickerDialog datePickerDialog = new DatePickerDialog(
                             addMoneyView.getContext(), new DatePickerDialog.OnDateSetListener() {
                         @Override
                         public void onDateSet(DatePicker view, int y, int m, int d) {
@@ -299,7 +296,7 @@ public class MainActivity extends AppCompatActivity {
             public void onFocusChange(View v, boolean hasFocus) {
                 if (hasFocus) {
                     Log.d("MainActivity", "**********HAS FOCUS***********");
-                    datePickerDialog = new DatePickerDialog(
+                    DatePickerDialog datePickerDialog = new DatePickerDialog(
                             squashView.getContext(), new DatePickerDialog.OnDateSetListener() {
                         @Override
                         public void onDateSet(DatePicker view, int y, int m, int d) {
@@ -420,6 +417,11 @@ public class MainActivity extends AppCompatActivity {
         updateTextView();
     }
 
+    private void historyActivity(){
+        Intent intent = new Intent(MainActivity.this, HistoryActivity.class);
+        startActivity(intent);
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -467,6 +469,7 @@ public class MainActivity extends AppCompatActivity {
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_history) {
             Log.d("MainActivity", "HISTORY");
+            historyActivity();
             return true;
         }
         if (id == R.id.action_clear) {
@@ -476,8 +479,8 @@ public class MainActivity extends AppCompatActivity {
         }
         if (id == R.id.action_delete) {
             Log.d("MainActivity", "DELETE");
-            IOHelper.deleteFile(this, "input.xml");
-            IOHelper.deleteFile(this, "output.xml");
+//            IOHelper.deleteFile(this, "input.xml");
+//            IOHelper.deleteFile(this, "output.xml");
             clearTotal();
             return true;
         }
