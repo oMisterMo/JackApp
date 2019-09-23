@@ -36,7 +36,6 @@ public class MainActivity extends AppCompatActivity {
     private double[] historyAdded;
     private double[] historyWithdrawn;
 
-//    private DatePickerDialog datePickerDialog;
     private int day, month, year;
     private Calendar date;
 
@@ -156,24 +155,35 @@ public class MainActivity extends AppCompatActivity {
         final AlertDialog alertDialog = alertDialogBuilder.create();
         alertDialog.show();
 
-        //Handle date field
-        final EditText dateField = addMoneyView.findViewById(R.id.date_edit_text);
-        dateField.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+        //Handle name field
+        final EditText nameField = addMoneyView.findViewById(R.id.name_edit_text);
+        nameField.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
-                if (hasFocus) {
-                    Log.d("MainActivity", "**********HAS FOCUS***********");
-                    DatePickerDialog datePickerDialog = new DatePickerDialog(
-                            addMoneyView.getContext(), new DatePickerDialog.OnDateSetListener() {
-                        @Override
-                        public void onDateSet(DatePicker view, int y, int m, int d) {
-                            System.out.printf("Date touched: %d/%d/%d\n", d, (m + 1), y);
-                            dateField.setText(String.format(Locale.UK, "%d/%d/%d", d, (m + 1), y));
-                        }
-                    }, year, month, day);
-                    datePickerDialog.getDatePicker().setMaxDate(System.currentTimeMillis() + 1000);
-                    datePickerDialog.show();
+                String s = nameField.getText().toString();
+                s = s.trim();
+                if (s.length() >= 13) {
+                    nameField.setError("Name must have 1 - 12 characters");
                 }
+            }
+        });
+
+        //Handle date field
+        final EditText dateField = addMoneyView.findViewById(R.id.date_edit_text);
+        dateField.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d("MainActivity", "**********HAS FOCUS***********");
+                DatePickerDialog datePickerDialog = new DatePickerDialog(
+                        addMoneyView.getContext(), new DatePickerDialog.OnDateSetListener() {
+                    @Override
+                    public void onDateSet(DatePicker view, int y, int m, int d) {
+                        System.out.printf("Date touched: %d/%d/%d\n", d, (m + 1), y);
+                        dateField.setText(String.format(Locale.UK, "%d/%d/%d", d, (m + 1), y));
+                    }
+                }, year, month, day);
+                datePickerDialog.getDatePicker().setMaxDate(System.currentTimeMillis() + 1000);
+                datePickerDialog.show();
             }
         });
 
@@ -291,22 +301,20 @@ public class MainActivity extends AppCompatActivity {
 
         //Handle date field
         final EditText dateField = squashView.findViewById(R.id.date_edit_text);
-        dateField.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+        dateField.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                if (hasFocus) {
-                    Log.d("MainActivity", "**********HAS FOCUS***********");
-                    DatePickerDialog datePickerDialog = new DatePickerDialog(
-                            squashView.getContext(), new DatePickerDialog.OnDateSetListener() {
-                        @Override
-                        public void onDateSet(DatePicker view, int y, int m, int d) {
-                            System.out.printf("Date touched: %d/%d/%d\n", d, (m + 1), y);
-                            dateField.setText(String.format(Locale.UK, "%d/%d/%d", d, (m + 1), y));
-                        }
-                    }, year, month, day);
-                    datePickerDialog.getDatePicker().setMaxDate(System.currentTimeMillis() + 1000);
-                    datePickerDialog.show();
-                }
+            public void onClick(View v) {
+                Log.d("MainActivity", "**********HAS FOCUS***********");
+                DatePickerDialog datePickerDialog = new DatePickerDialog(
+                        squashView.getContext(), new DatePickerDialog.OnDateSetListener() {
+                    @Override
+                    public void onDateSet(DatePicker view, int y, int m, int d) {
+                        System.out.printf("Date touched: %d/%d/%d\n", d, (m + 1), y);
+                        dateField.setText(String.format(Locale.UK, "%d/%d/%d", d, (m + 1), y));
+                    }
+                }, year, month, day);
+                datePickerDialog.getDatePicker().setMaxDate(System.currentTimeMillis() + 1000);
+                datePickerDialog.show();
             }
         });
 
@@ -417,7 +425,7 @@ public class MainActivity extends AppCompatActivity {
         updateTextView();
     }
 
-    private void historyActivity(){
+    private void historyActivity() {
         Intent intent = new Intent(MainActivity.this, HistoryActivity.class);
         startActivity(intent);
     }

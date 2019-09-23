@@ -29,6 +29,7 @@
             android:alpha="0.2"
             android:hint="@string/input_hint_date"
             android:importantForAutofill="no"
+            android:focusable="false"
             android:inputType="date"
             android:textAppearance="@style/TextAppearance.AppCompat.Body2" />
 
