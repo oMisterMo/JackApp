@@ -19,6 +19,7 @@
             android:hint="@string/input_hint_location"
             android:importantForAutofill="no"
             android:inputType="text|textCapSentences|textCapWords"
+            android:maxLength="13"
             android:textAppearance="@style/TextAppearance.AppCompat.Body2" />
 
         <EditText

@@ -11,7 +11,9 @@ import com.google.android.material.snackbar.Snackbar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -187,6 +189,10 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        //Handle price field
+        EditText priceEditText = addMoneyView.findViewById(R.id.price_edit_text);
+        priceEditText.addTextChangedListener(new DecimalFilter(priceEditText));
+
         //Save Button
         Button saveData = addMoneyView.findViewById(R.id.button_save);
         saveData.setOnClickListener(new View.OnClickListener() {
@@ -230,9 +236,9 @@ public class MainActivity extends AppCompatActivity {
                 }
 
 
-                EditText editText = addMoneyView.findViewById(R.id.edit_text);
-//                editText.addTextChangedListener(new DecimalFilter(editText, activity));
-                String inputNum = editText.getText().toString();
+                EditText priceEditText = addMoneyView.findViewById(R.id.price_edit_text);
+//                priceEditText.addTextChangedListener(new DecimalFilter(priceEditText, MainActivity.this));
+                String inputNum = priceEditText.getText().toString();
                 if (TextUtils.isEmpty(inputNum)) {
                     Snackbar.make(v, "Price can not be empty", Snackbar.LENGTH_SHORT)
                             .setAction("Action", null).show();
@@ -284,14 +290,14 @@ public class MainActivity extends AppCompatActivity {
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(MainActivity.this);
 
         LayoutInflater layoutInflater = LayoutInflater.from(MainActivity.this);
-        final View squashView = layoutInflater.inflate(R.layout.input_squash_games, null);
-        alertDialogBuilder.setView(squashView);
+        final View subMoneyView = layoutInflater.inflate(R.layout.input_squash_games, null);
+        alertDialogBuilder.setView(subMoneyView);
         final AlertDialog alertDialog = alertDialogBuilder.create();
         alertDialog.show();
 
 
         //Handle location field
-        EditText locationField = squashView.findViewById(R.id.location_edit_text);
+        EditText locationField = subMoneyView.findViewById(R.id.location_edit_text);
         locationField.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
@@ -300,13 +306,13 @@ public class MainActivity extends AppCompatActivity {
         });
 
         //Handle date field
-        final EditText dateField = squashView.findViewById(R.id.date_edit_text);
+        final EditText dateField = subMoneyView.findViewById(R.id.date_edit_text);
         dateField.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Log.d("MainActivity", "**********HAS FOCUS***********");
                 DatePickerDialog datePickerDialog = new DatePickerDialog(
-                        squashView.getContext(), new DatePickerDialog.OnDateSetListener() {
+                        subMoneyView.getContext(), new DatePickerDialog.OnDateSetListener() {
                     @Override
                     public void onDateSet(DatePicker view, int y, int m, int d) {
                         System.out.printf("Date touched: %d/%d/%d\n", d, (m + 1), y);
@@ -318,16 +324,19 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        //Handle price field
+        EditText priceEditText = subMoneyView.findViewById(R.id.price_edit_text);
+        priceEditText.addTextChangedListener(new DecimalFilter(priceEditText));
 
         //Save Button
-        Button saveData = squashView.findViewById(R.id.button_save);
+        Button saveData = subMoneyView.findViewById(R.id.button_save);
         saveData.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Log.d("MainActivity", "Save pressed...");
 
                 //Handle location field -------------------------------------------> 1
-                EditText locationEditText = squashView.findViewById(R.id.location_edit_text);
+                EditText locationEditText = subMoneyView.findViewById(R.id.location_edit_text);
                 String inputLocation = locationEditText.getText().toString();
                 if (TextUtils.isEmpty(inputLocation)) {
                     //default location
@@ -343,7 +352,7 @@ public class MainActivity extends AppCompatActivity {
 
                 //Handle date field -----------------------------------------------> 2
                 int d, m, y;
-                EditText dateEditText = squashView.findViewById(R.id.date_edit_text);
+                EditText dateEditText = subMoneyView.findViewById(R.id.date_edit_text);
                 String inputDate = dateEditText.getText().toString();
                 if (TextUtils.isEmpty(inputDate)) {
                     //default day (current)
@@ -363,7 +372,7 @@ public class MainActivity extends AppCompatActivity {
 
 
                 //Handle price field ----------------------------------------------> 3
-                EditText priceEditText = squashView.findViewById(R.id.price_edit_text);
+                EditText priceEditText = subMoneyView.findViewById(R.id.price_edit_text);
                 String inputNum = priceEditText.getText().toString();
                 if (TextUtils.isEmpty(inputNum)) {
                     Snackbar.make(v, "Price can not be empty", Snackbar.LENGTH_SHORT)
@@ -385,7 +394,7 @@ public class MainActivity extends AppCompatActivity {
                     System.out.println("Final String is: " + s);
                     System.out.println("Now saving file...");
 
-                    IOHelper.writeToXMLoutput(squashView, new Session(String.valueOf(d), String.valueOf(m),
+                    IOHelper.writeToXMLoutput(subMoneyView, new Session(String.valueOf(d), String.valueOf(m),
                             String.valueOf(y), inputLocation, inputNum));
 
                     updateTextView();
@@ -396,7 +405,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        Button cancelButton = squashView.findViewById(R.id.button_cancel);
+        Button cancelButton = subMoneyView.findViewById(R.id.button_cancel);
         cancelButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
